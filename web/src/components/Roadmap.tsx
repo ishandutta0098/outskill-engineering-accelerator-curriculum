@@ -9,7 +9,6 @@ import {
 import { ArrowRight, Flag, Trophy } from 'lucide-react'
 import { sprints, type Sprint } from '../data/curriculum'
 import { getSprintIcon } from './sprintIcons'
-import SprintCard from './SprintCard'
 import Walker from './Walker'
 
 interface Props {
@@ -18,15 +17,17 @@ interface Props {
 
 export default function Roadmap({ onOpen }: Props) {
   const reduced = useReducedMotion()
-  if (reduced) return <VerticalFallback onOpen={onOpen} />
-  return <HorizontalJourney onOpen={onOpen} />
+  return <HorizontalJourney onOpen={onOpen} reduced={!!reduced} />
 }
 
 /* ------------------------------------------------------------------ */
 /* Horizontal "walk the road" journey                                  */
 /* ------------------------------------------------------------------ */
 
-function HorizontalJourney({ onOpen }: Props) {
+function HorizontalJourney({
+  onOpen,
+  reduced,
+}: Props & { reduced: boolean }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [vp, setVp] = useState({ w: 1280, h: 800 })
 
@@ -61,7 +62,10 @@ function HorizontalJourney({ onOpen }: Props) {
     offset: ['start start', 'end end'],
   })
   const xRaw = useTransform(scrollYProgress, (p) => -maxRef.current * p)
-  const x = useSpring(xRaw, { stiffness: 120, damping: 30, restDelta: 0.5 })
+  const xSpring = useSpring(xRaw, { stiffness: 120, damping: 30, restDelta: 0.5 })
+  // Reduced motion: track scroll 1:1 (no spring inertia, the part that
+  // actually triggers vestibular discomfort) while still walking the road.
+  const x = reduced ? xRaw : xSpring
 
   // Road vertical placement.
   const roadTop = Math.round(h * 0.72)
@@ -148,6 +152,7 @@ function HorizontalJourney({ onOpen }: Props) {
                 tall={i % 2 === 0}
                 onOpen={onOpen}
                 mobile={isMobile}
+                reduced={reduced}
               />
             </Station>
           ))}
@@ -230,11 +235,13 @@ function Signpost({
   tall,
   onOpen,
   mobile,
+  reduced,
 }: {
   sprint: Sprint
   tall: boolean
   onOpen: (s: Sprint) => void
   mobile: boolean
+  reduced: boolean
 }) {
   const Icon = getSprintIcon(sprint.icon)
   const postH = tall ? (mobile ? 70 : 120) : mobile ? 30 : 56
@@ -244,11 +251,11 @@ function Signpost({
     <div className="flex flex-col items-center">
       <motion.button
         onClick={() => onOpen(sprint)}
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={reduced ? false : { opacity: 0, y: 30 }}
+        whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-10% 0px' }}
         transition={{ duration: 0.5 }}
-        whileHover={{ y: -6 }}
+        whileHover={reduced ? undefined : { y: -6 }}
         style={{ width: cardW }}
         className="group relative rounded-2xl border border-white/10 bg-surface-container/70 p-5 text-left shadow-[0_10px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl transition-colors hover:border-lime/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-lime"
       >
@@ -343,42 +350,5 @@ function Finish() {
         }}
       />
     </div>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/* Reduced-motion / accessible vertical fallback                       */
-/* ------------------------------------------------------------------ */
-
-function VerticalFallback({ onOpen }: Props) {
-  return (
-    <section id="roadmap" className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-3xl px-5 md:px-12">
-        <div className="mx-auto mb-16 max-w-2xl text-center">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-lime">
-            The Road to AI-Native
-          </span>
-          <h2 className="mt-4 font-display text-4xl font-bold text-on-surface md:text-5xl">
-            8 Sprints. 14 Days.
-            <br />
-            One AI-Native Engineer.
-          </h2>
-          <p className="mt-5 text-lg text-on-surface-variant">
-            A guided journey through the future of engineering. Tap any sprint
-            to reveal its full day-by-day breakdown.
-          </p>
-        </div>
-        <div className="space-y-8">
-          {sprints.map((sprint) => (
-            <SprintCard
-              key={sprint.id}
-              sprint={sprint}
-              side="left"
-              onOpen={onOpen}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
   )
 }
