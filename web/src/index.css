@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-background: #0c0d0e;
+  --color-surface: #121315;
+  --color-surface-container-lowest: #0d0e0f;
+  --color-surface-container-low: #1b1c1d;
+  --color-surface-container: #1f2021;
+  --color-surface-container-high: #292a2b;
+  --color-surface-variant: #343536;
+
+  --color-primary: #f3ffd3;
+  --color-lime: #b8ef43;
+  --color-lime-dim: #a2d72b;
+  --color-on-lime: #1f2b00;
+
+  --color-violet: #c9aeff;
+  --color-violet-deep: #6001d1;
+
+  --color-on-surface: #e7e7e6;
+  --color-on-surface-variant: #b9c0a8;
+  --color-outline: #8d937c;
+
+  --font-display: 'Fira Sans', sans-serif;
+  --font-body: 'Fira Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 24px rgba(184, 239, 67, 0.35);
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .bg-mesh {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(184, 239, 67, 0.06) 0%, transparent 45%),
+      radial-gradient(circle at 85% 30%, rgba(96, 1, 209, 0.07) 0%, transparent 40%),
+      radial-gradient(circle at 10% 70%, rgba(184, 239, 67, 0.04) 0%, transparent 40%);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
