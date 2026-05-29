@@ -19,22 +19,24 @@ interface Props {
 export default function SprintCard({ sprint, side, onOpen }: Props) {
   const ref = useRef<HTMLButtonElement>(null)
   const reduced = useReducedMotion()
+
   const mx = useMotionValue(0)
   const my = useMotionValue(0)
-  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [8, -8]), {
-    stiffness: 200,
-    damping: 20,
-  })
-  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-8, 8]), {
-    stiffness: 200,
-    damping: 20,
-  })
+  const spring = { stiffness: 220, damping: 22 }
+  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [6, -6]), spring)
+  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-6, 6]), spring)
 
   const handleMove = (e: React.MouseEvent) => {
-    if (reduced || !ref.current) return
+    if (!ref.current) return
     const rect = ref.current.getBoundingClientRect()
-    mx.set((e.clientX - rect.left) / rect.width - 0.5)
-    my.set((e.clientY - rect.top) / rect.height - 0.5)
+    const px = e.clientX - rect.left
+    const py = e.clientY - rect.top
+    // Drive the cursor-following glow (Linear/Stripe technique)
+    ref.current.style.setProperty('--x', `${px}px`)
+    ref.current.style.setProperty('--y', `${py}px`)
+    if (reduced) return
+    mx.set(px / rect.width - 0.5)
+    my.set(py / rect.height - 0.5)
   }
   const reset = () => {
     mx.set(0)
@@ -49,7 +51,7 @@ export default function SprintCard({ sprint, side, onOpen }: Props) {
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      style={{ perspective: 1000 }}
+      style={{ perspective: 1100 }}
       className="w-full"
     >
       <motion.button
@@ -57,19 +59,38 @@ export default function SprintCard({ sprint, side, onOpen }: Props) {
         onMouseMove={handleMove}
         onMouseLeave={reset}
         onClick={() => onOpen(sprint)}
+        whileHover={reduced ? undefined : { y: -4 }}
+        transition={spring}
         style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-        className="group glass relative w-full overflow-hidden rounded-3xl p-7 text-left transition-colors hover:border-lime/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-lime"
+        className="group relative w-full rounded-3xl border border-white/10 bg-surface-container/60 p-7 text-left shadow-[0_8px_30px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-shadow duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)] focus:outline-none focus-visible:ring-2 focus-visible:ring-lime"
       >
+        {/* Soft interior spotlight that follows the cursor */}
         <div
-          className="absolute inset-x-0 top-0 h-1"
-          style={{ background: sprint.accent }}
+          className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          style={{
+            background: `radial-gradient(420px circle at var(--x,50%) var(--y,0), ${sprint.accent}1f, transparent 55%)`,
+          }}
         />
+        {/* Border that lights up only where the cursor is (masked ring) */}
         <div
-          className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-10 blur-2xl transition-opacity group-hover:opacity-25"
+          className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            padding: '1.5px',
+            background: `radial-gradient(300px circle at var(--x,50%) var(--y,0), ${sprint.accent}, transparent 45%)`,
+            WebkitMask:
+              'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+          }}
+        />
+
+        {/* Accent index strip down the leading edge */}
+        <div
+          className="absolute left-0 top-7 h-12 w-1 rounded-full"
           style={{ background: sprint.accent }}
         />
 
-        <div className="flex items-start justify-between gap-4">
+        <div className="relative flex items-start justify-between gap-4">
           <div>
             <span className="font-mono text-xs uppercase tracking-widest text-lime">
               Sprint {sprint.sprintNo} · {sprint.dayRange}
@@ -79,18 +100,22 @@ export default function SprintCard({ sprint, side, onOpen }: Props) {
             </h3>
           </div>
           <div
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl"
-            style={{ background: `${sprint.accent}22`, color: sprint.accent }}
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10"
+            style={{
+              background: `${sprint.accent}1a`,
+              color: sprint.accent,
+              transform: 'translateZ(40px)',
+            }}
           >
             <Icon size={22} />
           </div>
         </div>
 
-        <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">
+        <p className="relative mt-4 text-sm leading-relaxed text-on-surface-variant">
           {sprint.tagline}
         </p>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="relative mt-5 flex flex-wrap gap-2">
           {sprint.tools.slice(0, 4).map((t) => (
             <span
               key={t}
@@ -101,7 +126,7 @@ export default function SprintCard({ sprint, side, onOpen }: Props) {
           ))}
         </div>
 
-        <div className="mt-5 flex items-center gap-1.5 text-sm font-semibold text-lime opacity-80 transition-opacity group-hover:opacity-100">
+        <div className="relative mt-5 flex items-center gap-1.5 text-sm font-semibold text-lime opacity-80 transition-opacity group-hover:opacity-100">
           Explore sprint
           <ArrowRight
             size={16}

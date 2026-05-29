@@ -66,8 +66,85 @@ body {
   }
 }
 
+/* Walking character animation */
+@keyframes walk-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-2.5px);
+  }
+  75% {
+    transform: translateY(-1px);
+  }
+}
+@keyframes walk-leg-a {
+  0%,
+  100% {
+    transform: rotate(26deg);
+  }
+  50% {
+    transform: rotate(-26deg);
+  }
+}
+@keyframes walk-leg-b {
+  0%,
+  100% {
+    transform: rotate(-26deg);
+  }
+  50% {
+    transform: rotate(26deg);
+  }
+}
+@keyframes walk-arm-a {
+  0%,
+  100% {
+    transform: rotate(-22deg);
+  }
+  50% {
+    transform: rotate(22deg);
+  }
+}
+@keyframes walk-arm-b {
+  0%,
+  100% {
+    transform: rotate(22deg);
+  }
+  50% {
+    transform: rotate(-22deg);
+  }
+}
+
+.walk-bob {
+  animation: walk-bob 0.7s ease-in-out infinite;
+}
+.walk-leg-a {
+  transform-origin: top center;
+  animation: walk-leg-a 0.7s ease-in-out infinite;
+}
+.walk-leg-b {
+  transform-origin: top center;
+  animation: walk-leg-b 0.7s ease-in-out infinite;
+}
+.walk-arm-a {
+  transform-origin: top center;
+  animation: walk-arm-a 0.7s ease-in-out infinite;
+}
+.walk-arm-b {
+  transform-origin: top center;
+  animation: walk-arm-b 0.7s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .walk-bob,
+  .walk-leg-a,
+  .walk-leg-b,
+  .walk-arm-a,
+  .walk-arm-b {
+    animation: none;
   }
 }
