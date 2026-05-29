@@ -6,9 +6,6 @@ export default function Footer() {
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-5 md:flex-row md:px-12">
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center gap-2 md:justify-start">
-            <span className="grid h-7 w-7 place-items-center rounded-md bg-lime font-mono text-sm font-bold text-on-lime">
-              C7
-            </span>
             <span className="font-display text-lg font-bold text-primary">
               Engineering Accelerator
             </span>

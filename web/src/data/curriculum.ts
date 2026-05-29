@@ -371,7 +371,7 @@ export const sprints: Sprint[] = [
 ]
 
 export const programStats = [
-  { label: 'Sprints', value: '8' },
+  { label: 'Sprints', value: '7' },
   { label: 'Days', value: '14' },
   { label: 'Live Hours', value: '40+' },
   { label: 'Capstone', value: 'Orion' },
